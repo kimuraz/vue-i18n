@@ -6,6 +6,7 @@ const messages = {
     primitive: 'one: {0}, two: {1}',
     component: 'element: {0}, component: {1}',
     mixed: 'text: {x}, component: {y}',
+		linkedMixed: '@:mixed',
     link: '@:primitive',
     term: 'I accept xxx {0}.',
     tos: 'Term of service',
@@ -187,6 +188,24 @@ describe('component interpolation', () => {
           assert(spy.notCalled === false)
           assert(spy.callCount === 1)
           spy.restore()
+        }).then(done)
+      })
+    })
+
+    describe('does not place on linked literal {}', () => {
+      it('should be interpolated', done => {
+        const el = document.createElement('div')
+        const vm = new Vue({
+          i18n,
+          components,
+          render (h) {
+            return h('i18n', { props: { path: 'linkedMixed', places: { 'x': 'foo {text}', 'text': 'raw' } } }, [
+              h('comp', { props: { msg: 'bar' }, attrs: { place: 'y' } })
+            ])
+          }
+        }).$mount(el)
+        nextTick(() => {
+          assert.strictEqual(vm.$el.innerHTML, 'text: foo, component: <p place="y">bar</p>')
         }).then(done)
       })
     })
